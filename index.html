@@ -122,6 +122,7 @@
       rows.forEach((row, index) => {
         row.style.display = (index >= start && index < end) ? '' : 'none';
       });
+      sendHeight();
     }
     function nextPage() {
       if ((currentPage + 1) * rowsPerPage < rows.length) {
@@ -135,7 +136,15 @@
         showPage(currentPage);
       }
     }
-    showPage(0);
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      window.parent.postMessage({ height }, '*');
+    }
+    window.addEventListener('load', () => {
+      showPage(0);
+      sendHeight();
+    });
+    window.addEventListener('resize', sendHeight);
   </script>
 </body>
 </html>
