@@ -17,14 +17,15 @@
     .pagination-wrapper { display: flex; justify-content: flex-end; margin-top: 10px; }
     .pagination-controls button { background: none; color: #fff; border: none; font-weight: bold; margin: 0 4px; cursor: pointer; font-size: 14px; position: relative; }
     .pagination-controls button:hover { color: #ff0; }
-    .pagination-controls span#currentPage { color: white; background-color: #2b2b2b; padding: 5px 10px; border-radius: 4px; border-bottom: 2px solid yellow; font-weight: bold; }
+    .pagination-controls input { background-color: #2b2b2b; color: white; width: 40px; text-align: center; border: none; border-bottom: 2px solid yellow; font-weight: bold; border-radius: 4px; }
+    .pagination-controls input:focus { outline: none; border-bottom: 2px solid #ff0; }
   </style>
 </head>
 <body>
   <div class='pagination-wrapper'>
     <div class='pagination-controls'>
-      <button onclick='goToPage(0)'>First</button>
-      <span id='currentPage'>1</span>
+      <button onclick='previousPage()'>Previous</button>
+      <input type='number' id='pageInput' min='1' value='1' onchange='goToInputPage()'>
       <button onclick='nextPage()'>Next</button>
     </div>
   </div>
@@ -117,41 +118,47 @@
 </table>
   <div class='pagination-wrapper'>
     <div class='pagination-controls'>
-      <button onclick='goToPage(0)'>First</button>
-      <span id='currentPage'>1</span>
+      <button onclick='previousPage()'>Previous</button>
+      <input type='number' id='pageInputBottom' min='1' value='1' onchange='goToInputPageBottom()'>
       <button onclick='nextPage()'>Next</button>
     </div>
   </div>
   <script>
     let currentPage = 0;
-    const rowsPerPage = 5;
+    const rowsPerPage = 100;
     const rows = document.querySelectorAll('.row');
     function showPage(page) {
+      const totalPages = Math.ceil(rows.length / rowsPerPage);
+      if (page < 0 || page >= totalPages) return;
       const start = page * rowsPerPage;
       const end = start + rowsPerPage;
       rows.forEach((row, index) => {
         row.style.display = (index >= start && index < end) ? '' : 'none';
       });
       currentPage = page;
-      document.getElementById('currentPage').innerText = (page + 1);
+      document.getElementById('pageInput').value = page + 1;
+      document.getElementById('pageInputBottom').value = page + 1;
       sendHeight();
     }
     function nextPage() {
-      if ((currentPage + 1) * rowsPerPage < rows.length) {
-        showPage(currentPage + 1);
-      }
+      showPage(currentPage + 1);
     }
-    function goToPage(page) {
-      showPage(page);
+    function previousPage() {
+      showPage(currentPage - 1);
+    }
+    function goToInputPage() {
+      const input = parseInt(document.getElementById('pageInput').value) - 1;
+      showPage(input);
+    }
+    function goToInputPageBottom() {
+      const input = parseInt(document.getElementById('pageInputBottom').value) - 1;
+      showPage(input);
     }
     function sendHeight() {
       const height = document.body.scrollHeight;
       window.parent.postMessage({ height }, '*');
     }
-    window.addEventListener('load', () => {
-      showPage(0);
-      sendHeight();
-    });
+    window.addEventListener('load', () => { showPage(0); sendHeight(); });
     window.addEventListener('resize', sendHeight);
   </script>
 </body>
